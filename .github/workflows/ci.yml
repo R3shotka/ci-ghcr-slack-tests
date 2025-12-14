@@ -52,7 +52,7 @@ jobs:
         run: ruff check .
 
       - name: Unit tests
-        run: pytest -m "not integration and not acceptance" --cov=app --cov-report=xml
+        run: pytest tests/unit --cov=app --cov-report=xml
 
       - name: Install postgres client (pg_isready)
         run: |
