@@ -192,7 +192,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint_unit_integration, docker_acceptance, push_ghcr]
     if: always()
-
     steps:
       - name: Notify Slack
         uses: slackapi/slack-github-action@v2.1.1
@@ -200,13 +199,22 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "*CI result*: ${{ github.repository }} @ ${{ github.ref }}"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "*CI result:* `${{ needs.lint_unit_integration.result }}` → `${{ needs.docker_acceptance.result }}` → `${{ needs.push_ghcr.result }}`
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "*Run:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            {
+              "text": "CI: ${{ github.repository }} @ ${{ github.ref }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*CI result:* `${{ needs.lint_unit_integration.result }}` → `${{ needs.docker_acceptance.result }}` → `${{ needs.push_ghcr.result }}`"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Run:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                }
+              ]
+            }
