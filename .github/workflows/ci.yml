@@ -70,8 +70,8 @@ jobs:
 
       - name: Integration tests (Postgres)
         env:
-          DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/app
-        run: pytest -m integration
+            DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/app
+        run: pytest tests/integration -m integration
 
   docker_acceptance:
     runs-on: ubuntu-latest
@@ -103,7 +103,7 @@ jobs:
       - name: Run container for acceptance tests
         run: |
           docker run -d --name app -p 8000:8000 ${{ env.IMAGE_NAME }}:test-${{ github.sha }}
-          pytest -m acceptance
+          pytest tests/acceptance -m acceptance
 
       - name: Cleanup
         if: always()
