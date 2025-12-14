@@ -19,6 +19,8 @@ env:
 jobs:
   lint_unit_integration:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     services:
       postgres:
@@ -76,6 +78,8 @@ jobs:
   docker_acceptance:
     runs-on: ubuntu-latest
     needs: lint_unit_integration
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - uses: actions/checkout@v4
