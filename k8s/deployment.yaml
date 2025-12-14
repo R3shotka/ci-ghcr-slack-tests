@@ -6,15 +6,13 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: app
+    matchLabels: { app: app }
   template:
     metadata:
-      labels:
-        app: app
+      labels: { app: app }
     spec:
       containers:
         - name: app
-          image: ghcr.io/REPLACE_ME/REPLACE_ME:latest
+          image: ghcr.io/OWNER/REPO:latest
           ports:
             - containerPort: 8000
