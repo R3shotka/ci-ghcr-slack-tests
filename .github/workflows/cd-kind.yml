@@ -1,0 +1,55 @@
+name: CD (KinD)
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "GHCR tag to deploy (latest, sha-..., v1.2.3)"
+        required: true
+        default: "latest"
+      install_monitoring:
+        description: "Install monitoring stack"
+        required: true
+        default: "true"
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  deploy_kind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create KinD cluster
+        uses: helm/kind-action@v1.10.0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy app
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+          TAG="${{ github.ref_type == 'tag' && github.ref_name || inputs.image_tag }}"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:$TAG"
+          echo "Deploy image: $IMAGE"
+
+          kubectl -n app set image deployment/app app="$IMAGE"
+          kubectl -n app rollout status deployment/app --timeout=180s
+          kubectl -n app get pods -o wide
+          kubectl -n app get svc -o wide
+
+      - name: Install monitoring (Prometheus + Grafana)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.install_monitoring }}
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+          helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+            -n monitoring --create-namespace -f monitoring/values.yaml
+          kubectl -n monitoring get pods
