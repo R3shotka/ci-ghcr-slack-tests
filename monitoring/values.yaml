@@ -1,9 +1,3 @@
 grafana:
   service:
     type: ClusterIP
-prometheus:
-  service:
-    type: ClusterIP
-alertmanager:
-  service:
-    type: ClusterIP
